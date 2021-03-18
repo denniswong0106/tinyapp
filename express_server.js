@@ -136,14 +136,14 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
 
   const user = isUserValid(req.session.user_id, users);
-  const urlUser = urlDatabase[req.params.id].userID;
+  const urlInfo = urlDatabase[req.params.id];
 
   if (!user) {
     res.redirect(`/login`);
     return;
   }
 
-  if (user.user_id === urlUser) {
+  if (user.id === urlInfo.userID) {
     delete urlDatabase[req.params.id];
     res.redirect(`/urls`);
   } 
@@ -160,8 +160,10 @@ app.post("/urls/:id", (req, res) => {
     res.redirect(`/login`);
     return;
   }
+  console.log('urlInfo:', urlInfo, user);
 
-  if (user.user_id === urlUser.userID) {
+  if (user.id === urlInfo.userID) {
+    console.log('urlInfo:', urlInfo);
     urlInfo.longURL = req.body.longURL;
     res.redirect(`/urls`);
   }
@@ -204,7 +206,7 @@ app.post("/login", (req, res) => {
   }
 
   const passwordEntry = req.body.password;
-  const passwordStored = existingUser.password;
+  const passwordStored = user.password;
 
   if (!bcrypt.compareSync(passwordEntry, passwordStored)) {
     res.statusCode = 404;
@@ -229,39 +231,44 @@ app.post("/logout", (req, res) => {
 
 // 'get the register new user page:
 app.get("/register", (req, res) => {
-  const templateVars = {
-    'user_id'  : users[req.session.user_id]
-  }
+
+  const user = isUserValid(req.session.user_id, users);
+  const templateVars = { user };
   res.render("register",templateVars)
 });
 
 // register POST function 
 // has 2 error handling conditions:
-// first if handles if either email or password has a empty space in it
-// second if handles if email is a previously stored email.
+// 1) if user exists
+// 2) password not valid (has string ' ' in it)
 
 app.post("/register", (req, res) => {
 
-  if (req.body.email.includes(' ') ||
-      req.body.password.includes(' ')) {
+  const existingUser = getUserByEmail(req.body.email, users);
+  const invalidPassword = req.body.email.includes(' ') || req.body.password.includes(' ');
+  
+  if (existingUser) {
+    res.statusCode = 404;
+    res.end('email Already used. Please choose a new one.');
+    return;
+  }
+
+  if (invalidPassword) {
     res.statusCode = 404;
     res.end('put in proper email and password');
+    return;
   }
-  
-  else if (getUserByEmail(req.body.email, users)) {
-    res.statusCode = 404;
-    res.end('email Already used');
+  if (!invalidPassword) {
+
+    const id = generateRandomString();
+    const email = req.body.email;
+    const password = bcrypt.hashSync(req.body.password, 10);
+    users[id] = { id, email, password };
+
+    req.session.user_id = id;
+    res.redirect('/urls');
   }
-  
-  else {
-  const id = generateRandomString();
-  const email = req.body.email;
-  const password = bcrypt.hashSync(req.body.password, 10);
-  users[id] = { id, email, password };
-  req.session.user_id = id;
-  res.redirect('/urls');
-  console.log(users[id]);
-  }
+
 });
 
 app.get("/*", (req, res) => {
