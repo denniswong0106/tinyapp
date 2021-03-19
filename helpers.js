@@ -57,5 +57,17 @@ const isStringValid = string => {
   return true;
 }
 
+// a function that, when given the session cookie, will return the same value input if input is true, if input is falsy, will return a random string;
+const isVisitorId = val => {
+  if (val) {
+    console.log('visitor has previously been here');
+    return val;
+  } else {
+    console.log('new visitor');
+    return generateRandomString();
+  }
+}
 
-module.exports = {generateRandomString, getUserByEmail, userUrls, isUserValid, isStringValid }
+
+
+module.exports = {generateRandomString, getUserByEmail, userUrls, isUserValid, isStringValid, isVisitorId }

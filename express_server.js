@@ -20,7 +20,7 @@ app.use(cookieSession({
 // ----------------------------------//
 // Helper functions
 
-const { generateRandomString, userUrls, getUserByEmail,isUserValid, isStringValid } = require("./helpers");
+const { generateRandomString, userUrls, getUserByEmail, isUserValid, isStringValid, isVisitorId } = require("./helpers");
 
 //----------------------------------//
 // Data
@@ -49,8 +49,12 @@ const users = {
 // 'get' the home page which displays all stored urls;
 app.get("/urls", (req, res) => {
 
-  console.log('test .isNew:', req.session.isNew);
-  console.log('cookie_id', req.session.user_id)
+
+  // console.log('test .isNew:', req.session.visitor_id);
+  // console.log('cookie_id', req.session.user_id)
+  console.log('isvisitorid before funct', req.session.visitor_id);
+  req.session.visitor_id = isVisitorId(req.session.visitor_id);
+  console.log('isvisitorid after funct', req.session.visitor_id);
 
   const user = isUserValid(req.session.user_id, users);
   const urls = userUrls(req.session.user_id, urlDatabase);
