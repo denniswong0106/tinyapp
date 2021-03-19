@@ -21,31 +21,31 @@ const getUserByEmail = (email, database) => {
 };
 
 // Function that filters the url Database and creates an object
-// of URLS that match the given user_id, 
+// of URLS that match the given user_id,
 // in the form of { shortURL: longURL } key value pairs.
 
-const userUrls = (user_id, database) => {
+const userUrls = (userId, database) => {
   const output = {};
   for (const url in database) {
-    if (database[url].userID === user_id) {
+    if (database[url].userID === userId) {
       output[url] = database[url].longURL;
     }
   }
   return output;
-}; 
+};
 
 // Function that gets given a user ID, and returns the user info if valid,
 // and returns false if wrong
 
-const isUserValid = (user_id, database) => {
-  if (!database[user_id]) {
+const isUserValid = (userId, database) => {
+  if (!database[userId]) {
     return false;
-  };
-  if (database[user_id]) {
-    return database[user_id];
   }
-}
-// function that filters a given string and filters if string meets requirements:
+  if (database[userId]) {
+    return database[userId];
+  }
+};
+// function that filters a given string and returns true if string doesnt meet error requirements;
 const isStringValid = string => {
 
   if (!string.length) {
@@ -55,7 +55,7 @@ const isStringValid = string => {
     return false;
   }
   return true;
-}
+};
 
 
-module.exports = {generateRandomString, getUserByEmail, userUrls, isUserValid, isStringValid }
+module.exports = {generateRandomString, getUserByEmail, userUrls, isUserValid, isStringValid };

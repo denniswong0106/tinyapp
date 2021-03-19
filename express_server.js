@@ -15,7 +15,7 @@ app.use(morgan('dev'));
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
-}))
+}));
 
 // ----------------------------------//
 // Helper functions
@@ -30,15 +30,15 @@ const urlDatabase = {
   i3BoGr: { longURL: "https://www.google.ca", userID: "eeeeee" }
 };
 
-const users = { 
+const users = {
   "eeeeee": {
-    id: "eeeeee", 
+    id: "eeeeee",
     email: "e@e.e",
     password: '$2b$10$QAkjtQlvSJY8KA1e.CaJT.9hatyoiGVApMpMJvWCLbHuoK.x.it1e'
   },
- "222222": {
-    id: "222222", 
-    email: "2@2.2", 
+  "222222": {
+    id: "222222",
+    email: "2@2.2",
     password: '$2b$10$F/7ZvBBphqpkTqzNzAlXJ.YZoTxXD1OYbV9XDET0GZnq3p1pXkT2G'
   }
 };
@@ -56,7 +56,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// 'get' the 'add new url' page. 
+// 'get' the 'add new url' page.
 // will error if attempted by non-registered user
 app.get("/urls/new", (req, res) => {
 
@@ -68,7 +68,7 @@ app.get("/urls/new", (req, res) => {
   }
   
   if (user) {
-    const templateVars = { user }
+    const templateVars = { user };
     res.render("urls_new", templateVars);
   }
 });
@@ -79,7 +79,7 @@ app.post("/urls", (req, res) => {
 
   if (!isUserValid(req.session.user_id, users)) {
     res.statusCode = 403;
-    res.end('You do not have access to this. Please login prior to creating new URL.') 
+    res.end('You do not have access to this. Please login prior to creating new URL.');
     return;
   }
 
@@ -87,7 +87,7 @@ app.post("/urls", (req, res) => {
     const newShortUrl = generateRandomString();
     const longURL = req.body.longURL;
     const userID = req.session.user_id;
-    urlDatabase[newShortUrl] = { longURL, userID }; 
+    urlDatabase[newShortUrl] = { longURL, userID };
 
     res.redirect(`/urls/${newShortUrl}`);
   }
@@ -125,7 +125,7 @@ app.get("/urls/:id", (req, res) => {
     const shortURL = req.params.id;
     const longURL = urlDatabase[req.params.id].longURL;
   
-    const templateVars = { user, shortURL, longURL } 
+    const templateVars = { user, shortURL, longURL };
 
     res.render("urls_show", templateVars);
 
@@ -160,7 +160,7 @@ app.post("/urls/:id", (req, res) => {
 });
 
 // Delete an existing url
-// will error if attempted by 
+// will error if attempted by
 app.post("/urls/:id/delete", (req, res) => {
 
   const user = isUserValid(req.session.user_id, users);
@@ -173,14 +173,14 @@ app.post("/urls/:id/delete", (req, res) => {
 
   if (!(user.id === urlInfo.userID)) {
     res.statusCode = 403;
-    res.end('You do not have permission to do this.')
+    res.end('You do not have permission to do this.');
     return;
-  } 
+  }
 
   if (user.id === urlInfo.userID) {
     delete urlDatabase[req.params.id];
     res.redirect(`/urls`);
-  } 
+  }
 
 });
 
@@ -270,12 +270,12 @@ app.get("/register", (req, res) => {
 
   if (!user) {
     const templateVars = { user };
-    res.render("register",templateVars)
+    res.render("register",templateVars);
   }
 
 });
 
-// register POST function 
+// register POST function
 // has 2 error handling conditions:
 // 1) if user exists
 // 2) password not valid (has ' ' in string, or if field is empty)
@@ -285,8 +285,6 @@ app.post("/register", (req, res) => {
   const existingUser = getUserByEmail(req.body.email, users);
   const validEmail = isStringValid(req.body.email);
   const validPassword = isStringValid(req.body.password);
-
-  console.log('valid email and password', validEmail, validPassword)
 
   if (existingUser) {
     res.statusCode = 404;
