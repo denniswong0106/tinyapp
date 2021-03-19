@@ -26,8 +26,8 @@ const { generateRandomString, userUrls, getUserByEmail,isUserValid, isStringVali
 // Data
 
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "eeeeee"  },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "eeeeee" }
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "eeeeee" , visitors : [{visitor_id: 'aaaaaa', time: 'timestamp'}] },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "eeeeee", visitors : [{visitor_id: 'aaaaaa', time: 'timestamp'}] }
 };
 
 const users = { 
@@ -87,7 +87,8 @@ app.post("/urls", (req, res) => {
     const newShortUrl = generateRandomString();
     const longURL = req.body.longURL;
     const userID = req.session.user_id;
-    urlDatabase[newShortUrl] = { longURL, userID }; 
+    const visitors = [];
+    urlDatabase[newShortUrl] = { longURL, userID, visitors }; 
 
     res.redirect(`/urls/${newShortUrl}`);
   }
@@ -98,6 +99,8 @@ app.post("/urls", (req, res) => {
 // returns error if :id is not a valid id in my database
 // returns errors if user is not logged in
 // returns error if logged in user is not the creator of the url
+//// I'm thinking to just pass the entire urldatabase[req.params.id] webpage,
+//// to display the tracker info
 app.get("/urls/:id", (req, res) => {
 
   const user = isUserValid(req.session.user_id, users);
@@ -112,6 +115,7 @@ app.get("/urls/:id", (req, res) => {
   if (!user) {
     res.statusCode = 403;
     res.end('Please login, you do not have access to this page');
+    return;
   }
 
   if (!(urlInfo.userID === user.id)) {
@@ -122,12 +126,9 @@ app.get("/urls/:id", (req, res) => {
 
   if (urlInfo.userID === user.id) {
     const shortURL = req.params.id;
-    const longURL = urlDatabase[req.params.id].longURL;
-  
-    const templateVars = { user, shortURL, longURL } 
+    const templateVars = { user, shortURL, urlInfo } 
 
     res.render("urls_show", templateVars);
-
   }
 
 });
