@@ -29,7 +29,7 @@ Let's try editing a url:
 !["edit url"](https://github.com/denniswong0106/tinyapp/blob/master/docs/edit-url.png)
 
 Let's take a look at our homepage again:
-!["homepage with 3 urls changed"](#https://github.com/denniswong0106/tinyapp/blob/master/docs/homepage-3urls-gmail.png)
+!["homepage with 3 urls changed"](https://github.com/denniswong0106/tinyapp/blob/master/docs/homepage-3urls-gmail.png)
 
 What happens if we logout and another user logs in?
 !["homepage another user"](https://github.com/denniswong0106/tinyapp/blob/master/docs/homepage-anotheruser.png)
