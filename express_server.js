@@ -23,7 +23,7 @@ const { generateRandomString } = require("./helpers");
 const { userUrls } = require("./helpers");
 const { getUserByEmail } = require("./helpers");
 const { isUserValid } = require("./helpers");
-
+const { isStringValid } = require("./helpers");
 
 //----------------------------------//
 // Data
@@ -80,11 +80,12 @@ app.get("/urls/new", (req, res) => {
 
 // POST function for new url page: function adds given url into url database
 // with the longurl and the userID of person logged in.
-// The function will not run for non-registered users
-app.post("/urls/new", (req, res) => {
+// Will return error if attempted by non-registered user
+app.post("/urls", (req, res) => {
 
   if (!isUserValid(req.session.user_id, users)) {
-    res.redirect("/login");
+    res.statusCode = 403;
+    res.end('You do not have access to this. Please login prior to creating new URL.') 
     return;
   }
 
@@ -97,12 +98,12 @@ app.post("/urls/new", (req, res) => {
     res.redirect(`/urls/${newShortUrl}`);
   }
 
-
 });
 
 // 'get' the generated shortURL page. Page displays the short and long url.
-// return forbidden access error if not logged in
-// returns invalid 'tinyURL given' if given a tinyURL that doesn't exist
+// returns error if :id is not a valid id in my database
+// returns errors if user is not logged in
+// returns error if logged in user is not the creator of the url
 app.get("/urls/:id", (req, res) => {
 
   const user = isUserValid(req.session.user_id, users);
@@ -114,9 +115,14 @@ app.get("/urls/:id", (req, res) => {
     return;
   }
 
-  if (!(urlInfo.userID === user.id)) {
+  if (!user) {
     res.statusCode = 403;
     res.end('Please login, you do not have access to this page');
+  }
+
+  if (!(urlInfo.userID === user.id)) {
+    res.statusCode = 403;
+    res.end('Your account does not have access to this page');
     return;
   }
 
@@ -128,6 +134,31 @@ app.get("/urls/:id", (req, res) => {
 
     res.render("urls_show", templateVars);
 
+  }
+
+});
+
+// Edit an existing url. 2 error handlers:
+// 1) will error if user not found in database
+// 2) will error if user is in database, but is not associated with the url
+app.post("/urls/:id", (req, res) => {
+
+  const user = isUserValid(req.session.user_id, users);
+  const urlInfo = urlDatabase[req.params.id];
+
+  if (!user) {
+    res.redirect(`/login`);
+    return;
+  }
+
+  if (!(user.id === urlInfo.userID)) {
+    res.statusCode = 403;
+    res.end('Please login, you do not have access to this page');
+  }
+    
+  if (user.id === urlInfo.userID) {
+    urlInfo.longURL = req.body.longURL;
+    res.redirect(`/urls`);
   }
 
 });
@@ -150,50 +181,44 @@ app.post("/urls/:id/delete", (req, res) => {
 
 });
 
-// Edit an existing url
-app.post("/urls/:id", (req, res) => {
-
-  const user = isUserValid(req.session.user_id, users);
-  const urlInfo = urlDatabase[req.params.id];
-
-  if (!user) {
-    res.redirect(`/login`);
-    return;
-  }
-  console.log('urlInfo:', urlInfo, user);
-
-  if (user.id === urlInfo.userID) {
-    console.log('urlInfo:', urlInfo);
-    urlInfo.longURL = req.body.longURL;
-    res.redirect(`/urls`);
-  }
-
-});
-
 // 'get' the given short url page which redirects the page to the longURL
 // basically, the /urls/:shortURL has a href which directs to this page, which then uses
 // this function to direct to the actual longURL page.
 // This page should be accessable for all users, whether logged in or not
 app.get("/u/:id", (req, res) => {
+
+  if (!urlDatabase[req.params.id]) {
+    res.statusCode = 404;
+    res.end('Sorry, page not found. Please check the url given is valid');
+    return;
+  }
   if (urlDatabase[req.params.id]) {
     const longURL = urlDatabase[req.params.id].longURL;
     res.redirect(longURL);
   }
-  else {
-    res.statusCode = 404;
-    res.end('Sorry, page not found. Please check the url given is valid');
-  }
+
 });
 
-// 'get' page for login
+// 'get' page for login. Redirects to /urls if already logged in
 app.get("/login", (req, res) => {
 
   const user = isUserValid(req.session.user_id, users);
-  const templateVars = { user };
-  res.render("login", templateVars);
+
+  if (user) {
+    res.redirect('/url');
+    return;
+  }
+
+  if (!user) {
+    const templateVars = { user };
+    res.render("login", templateVars);
+  }
+
 });
 
 // login POST function;
+// 1) if email does not exist, return error
+// 2) if password doesn't match password on file, return error
 app.post("/login", (req, res) => {
 
   // Are you an existing user?
@@ -201,7 +226,7 @@ app.post("/login", (req, res) => {
 
   if (!user) {
     res.statusCode = 403;
-    res.end('no user by this email address was found.');
+    res.end('invalid login credentials');
     return;
   }
 
@@ -210,7 +235,7 @@ app.post("/login", (req, res) => {
 
   if (!bcrypt.compareSync(passwordEntry, passwordStored)) {
     res.statusCode = 404;
-    res.end('invalid login credentials: user exists but password is wrong.');
+    res.end('invalid login credentials');
     return;
   }
 
@@ -230,35 +255,48 @@ app.post("/logout", (req, res) => {
 });
 
 // 'get the register new user page:
+// redirects to /url if user logged in already
 app.get("/register", (req, res) => {
 
   const user = isUserValid(req.session.user_id, users);
-  const templateVars = { user };
-  res.render("register",templateVars)
+
+  if (user) {
+    res.redirect('/url');
+    return;
+  }
+
+  if (!user) {
+    const templateVars = { user };
+    res.render("register",templateVars)
+  }
+
 });
 
 // register POST function 
 // has 2 error handling conditions:
 // 1) if user exists
-// 2) password not valid (has string ' ' in it)
+// 2) password not valid (has ' ' in string, or if field is empty)
 
 app.post("/register", (req, res) => {
 
   const existingUser = getUserByEmail(req.body.email, users);
-  const invalidPassword = req.body.email.includes(' ') || req.body.password.includes(' ');
-  
+  const validEmail = isStringValid(req.body.email);
+  const validPassword = isStringValid(req.body.password);
+
+  console.log('valid email and password', validEmail, validPassword)
+
   if (existingUser) {
     res.statusCode = 404;
     res.end('email Already used. Please choose a new one.');
     return;
   }
 
-  if (invalidPassword) {
+  if (!(validEmail && validPassword)) {
     res.statusCode = 404;
     res.end('put in proper email and password');
     return;
   }
-  if (!invalidPassword) {
+  if (validEmail && validPassword) {
 
     const id = generateRandomString();
     const email = req.body.email;

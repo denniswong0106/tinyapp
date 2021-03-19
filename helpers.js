@@ -45,5 +45,17 @@ const isUserValid = (user_id, database) => {
     return database[user_id];
   }
 }
+// function that filters a given string and filters if string meets requirements:
+const isStringValid = string => {
+  console.log('string', string.length);
+  if (!string.length) {
+    return false;
+  }
+  if (string.includes(' ')) {
+    return false;
+  }
+  return true;
+}
 
-module.exports = {generateRandomString, getUserByEmail, userUrls, isUserValid }
+
+module.exports = {generateRandomString, getUserByEmail, userUrls, isUserValid, isStringValid }
