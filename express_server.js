@@ -112,6 +112,7 @@ app.get("/urls/:id", (req, res) => {
   if (!user) {
     res.statusCode = 403;
     res.end('Please login, you do not have access to this page');
+    return;
   }
 
   if (!(urlInfo.userID === user.id)) {
@@ -148,6 +149,7 @@ app.post("/urls/:id", (req, res) => {
   if (!(user.id === urlInfo.userID)) {
     res.statusCode = 403;
     res.end('Please login, you do not have access to this page');
+    return;
   }
     
   if (user.id === urlInfo.userID) {
@@ -172,6 +174,7 @@ app.post("/urls/:id/delete", (req, res) => {
   if (!(user.id === urlInfo.userID)) {
     res.statusCode = 403;
     res.end('You do not have permission to do this.')
+    return;
   } 
 
   if (user.id === urlInfo.userID) {
