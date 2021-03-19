@@ -26,8 +26,8 @@ const { generateRandomString, userUrls, getUserByEmail, isUserValid, isStringVal
 // Data
 
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "eeeeee" , visitors : [{visitor_id: 'aaaaaa', time: 'timestamp'}] },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "eeeeee", visitors : [{visitor_id: 'aaaaaa', time: 'timestamp'}] }
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "eeeeee" , visitors : [] },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "eeeeee", visitors : [] }
 };
 
 const users = { 
@@ -49,10 +49,9 @@ const users = {
 // 'get' the home page which displays all stored urls;
 app.get("/urls", (req, res) => {
 
-  console.log('isvisitorid before funct', req.session.visitor_id);
   req.session.visitor_id = isVisitorId(req.session.visitor_id);
-  console.log('isvisitorid after funct', req.session.visitor_id);
-
+  console.log(urlDatabase.i3BoGr.visitors);
+  
   const user = isUserValid(req.session.user_id, users);
   const urls = userUrls(req.session.user_id, urlDatabase);
   const templateVars = { user, urls };
@@ -64,10 +63,8 @@ app.get("/urls", (req, res) => {
 // will error if attempted by non-registered user
 app.get("/urls/new", (req, res) => {
 
-  console.log('isvisitorid before funct', req.session.visitor_id);
   req.session.visitor_id = isVisitorId(req.session.visitor_id);
-  console.log('isvisitorid after funct', req.session.visitor_id);
-
+  
   const user = isUserValid(req.session.user_id, users);
 
   if (!user) {
@@ -111,10 +108,8 @@ app.post("/urls", (req, res) => {
 //// to display the tracker info
 app.get("/urls/:id", (req, res) => {
 
-  console.log('isvisitorid before funct', req.session.visitor_id);
   req.session.visitor_id = isVisitorId(req.session.visitor_id);
-  console.log('isvisitorid after funct', req.session.visitor_id);
-  
+    
   const user = isUserValid(req.session.user_id, users);
   const urlInfo = urlDatabase[req.params.id];
 
@@ -202,17 +197,21 @@ app.post("/urls/:id/delete", (req, res) => {
 // This page should be accessable for all users, whether logged in or not
 app.get("/u/:id", (req, res) => {
 
-  console.log('isvisitorid before funct', req.session.visitor_id);
   req.session.visitor_id = isVisitorId(req.session.visitor_id);
-  console.log('isvisitorid after funct', req.session.visitor_id);
-
-  if (!urlDatabase[req.params.id]) {
+  urlInfo = urlDatabase[req.params.id];
+  
+  if (!urlInfo) {
     res.statusCode = 404;
     res.end('Sorry, page not found. Please check the url given is valid');
     return;
   }
-  if (urlDatabase[req.params.id]) {
-    const longURL = urlDatabase[req.params.id].longURL;
+  if (urlInfo) {
+    const visitor_id = req.session.visitor_id;
+    const time = Date();
+    const visit = { visitor_id, time }
+
+    urlInfo.visitors.push(visit);
+    const longURL = urlInfo.longURL;
     res.redirect(longURL);
   }
 
@@ -221,10 +220,8 @@ app.get("/u/:id", (req, res) => {
 // 'get' page for login. Redirects to /urls if already logged in
 app.get("/login", (req, res) => {
 
-  console.log('isvisitorid before funct', req.session.visitor_id);
-  req.session.visitor_id = isVisitorId(req.session.visitor_id);
-  console.log('isvisitorid after funct', req.session.visitor_id);
-
+  req.session.visitor_id = isVisitorId(req.session.visitor_id)
+  
   const user = isUserValid(req.session.user_id, users);
 
   if (user) {
@@ -281,10 +278,8 @@ app.post("/logout", (req, res) => {
 // redirects to /url if user logged in already
 app.get("/register", (req, res) => {
 
-  console.log('isvisitorid before funct', req.session.visitor_id);
   req.session.visitor_id = isVisitorId(req.session.visitor_id);
-  console.log('isvisitorid after funct', req.session.visitor_id);
-
+  
   const user = isUserValid(req.session.user_id, users);
 
   if (user) {
