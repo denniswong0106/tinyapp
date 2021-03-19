@@ -21,6 +21,34 @@
           <button type="submit" class="btn-primary">Edit URL</button>
         </form>
       </div>
+
+      <h3>Visit History:</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Time Visited</th>
+            <th scope="col">Visitor ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% const listOfVisitIds = []%>
+          <% for(let visitor of urlInfo.visitors) { %>
+            <tr>
+              <td><%= visitor.time %></td>
+              <td><%= visitor.visitor_id %></td>
+              <% listOfVisitIds.push(visitor.visitor_id) %>
+            </tr>
+            <% } %>
+            <tr>
+              <td>Number of Visits: <%= urlInfo.visitors.length %></td>
+              <% listOfVisitIds.sort() %>
+              <% uniqueVisits = listOfVisitIds.filter((visitorId, index, thisArr) => { %>
+                <%return (index === 0) || (thisArr[index - 1] !== visitorId) %>
+              <% }) %>
+              <td>Number of Unique Visits: <%= uniqueVisits.length %></td>
+            </tr>
+        </tbody>
+      </table>
     </div>
 
   <!-- Bootstrap JS -->

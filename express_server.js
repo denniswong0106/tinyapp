@@ -50,7 +50,6 @@ const users = {
 app.get("/urls", (req, res) => {
 
   req.session.visitor_id = isVisitorId(req.session.visitor_id);
-  console.log(urlDatabase.i3BoGr.visitors);
   
   const user = isUserValid(req.session.user_id, users);
   const urls = userUrls(req.session.user_id, urlDatabase);
@@ -102,10 +101,9 @@ app.post("/urls", (req, res) => {
 
 // 'get' the generated shortURL page. Page displays the short and long url.
 // returns error if :id is not a valid id in my database
-// returns errors if user is not logged in
+// returns error if user is not logged in
 // returns error if logged in user is not the creator of the url
-//// I'm thinking to just pass the entire urldatabase[req.params.id] webpage,
-//// to display the tracker info
+
 app.get("/urls/:id", (req, res) => {
 
   req.session.visitor_id = isVisitorId(req.session.visitor_id);
@@ -304,8 +302,6 @@ app.post("/register", (req, res) => {
   const existingUser = getUserByEmail(req.body.email, users);
   const validEmail = isStringValid(req.body.email);
   const validPassword = isStringValid(req.body.password);
-
-  console.log('valid email and password', validEmail, validPassword)
 
   if (existingUser) {
     res.statusCode = 404;
