@@ -49,6 +49,9 @@ const users = {
 // 'get' the home page which displays all stored urls;
 app.get("/urls", (req, res) => {
 
+  console.log('test .isNew:', req.session.isNew);
+  console.log('cookie_id', req.session.user_id)
+
   const user = isUserValid(req.session.user_id, users);
   const urls = userUrls(req.session.user_id, urlDatabase);
   const templateVars = { user, urls };
