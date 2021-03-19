@@ -56,8 +56,8 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-// 'get' the 'add new url' page. If they are not logged in, do not alow 
-// them to access this page
+// 'get' the 'add new url' page. 
+// will error if attempted by non-registered user
 app.get("/urls/new", (req, res) => {
 
   const user = isUserValid(req.session.user_id, users);
@@ -74,7 +74,6 @@ app.get("/urls/new", (req, res) => {
 });
 
 // POST function for new url page: function adds given url into url database
-// with the longurl and the userID of person logged in.
 // Will return error if attempted by non-registered user
 app.post("/urls", (req, res) => {
 
@@ -159,6 +158,7 @@ app.post("/urls/:id", (req, res) => {
 });
 
 // Delete an existing url
+// will error if attempted by 
 app.post("/urls/:id/delete", (req, res) => {
 
   const user = isUserValid(req.session.user_id, users);
@@ -168,6 +168,11 @@ app.post("/urls/:id/delete", (req, res) => {
     res.redirect(`/login`);
     return;
   }
+
+  if (!(user.id === urlInfo.userID)) {
+    res.statusCode = 403;
+    res.end('You do not have permission to do this.')
+  } 
 
   if (user.id === urlInfo.userID) {
     delete urlDatabase[req.params.id];
