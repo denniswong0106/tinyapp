@@ -33,18 +33,16 @@ const urlDatabase = {
   i3BoGr: { longURL: "https://www.google.ca", userID: "eeeeee" }
 };
 
-const password1 = bcrypt.hashSync('e', 10);
-const password2 = bcrypt.hashSync('2', 10);
 const users = { 
   "eeeeee": {
     id: "eeeeee", 
     email: "e@e.e",
-    password: password1
+    password: '$2b$10$QAkjtQlvSJY8KA1e.CaJT.9hatyoiGVApMpMJvWCLbHuoK.x.it1e'
   },
  "222222": {
     id: "222222", 
     email: "2@2.2", 
-    password: password2
+    password: '$2b$10$F/7ZvBBphqpkTqzNzAlXJ.YZoTxXD1OYbV9XDET0GZnq3p1pXkT2G'
   }
 };
 
