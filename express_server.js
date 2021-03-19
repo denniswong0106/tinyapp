@@ -19,11 +19,8 @@ app.use(cookieSession({
 
 // ----------------------------------//
 // Helper functions
-const { generateRandomString } = require("./helpers");
-const { userUrls } = require("./helpers");
-const { getUserByEmail } = require("./helpers");
-const { isUserValid } = require("./helpers");
-const { isStringValid } = require("./helpers");
+
+const { generateRandomString, userUrls, getUserByEmail,isUserValid, isStringValid } = require("./helpers");
 
 //----------------------------------//
 // Data

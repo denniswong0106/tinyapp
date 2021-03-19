@@ -47,7 +47,7 @@ const isUserValid = (user_id, database) => {
 }
 // function that filters a given string and filters if string meets requirements:
 const isStringValid = string => {
-  console.log('string', string.length);
+
   if (!string.length) {
     return false;
   }
