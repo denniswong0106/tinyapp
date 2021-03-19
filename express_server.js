@@ -49,9 +49,6 @@ const users = {
 // 'get' the home page which displays all stored urls;
 app.get("/urls", (req, res) => {
 
-
-  // console.log('test .isNew:', req.session.visitor_id);
-  // console.log('cookie_id', req.session.user_id)
   console.log('isvisitorid before funct', req.session.visitor_id);
   req.session.visitor_id = isVisitorId(req.session.visitor_id);
   console.log('isvisitorid after funct', req.session.visitor_id);
@@ -66,6 +63,10 @@ app.get("/urls", (req, res) => {
 // 'get' the 'add new url' page. 
 // will error if attempted by non-registered user
 app.get("/urls/new", (req, res) => {
+
+  console.log('isvisitorid before funct', req.session.visitor_id);
+  req.session.visitor_id = isVisitorId(req.session.visitor_id);
+  console.log('isvisitorid after funct', req.session.visitor_id);
 
   const user = isUserValid(req.session.user_id, users);
 
@@ -110,6 +111,10 @@ app.post("/urls", (req, res) => {
 //// to display the tracker info
 app.get("/urls/:id", (req, res) => {
 
+  console.log('isvisitorid before funct', req.session.visitor_id);
+  req.session.visitor_id = isVisitorId(req.session.visitor_id);
+  console.log('isvisitorid after funct', req.session.visitor_id);
+  
   const user = isUserValid(req.session.user_id, users);
   const urlInfo = urlDatabase[req.params.id];
 
@@ -197,6 +202,10 @@ app.post("/urls/:id/delete", (req, res) => {
 // This page should be accessable for all users, whether logged in or not
 app.get("/u/:id", (req, res) => {
 
+  console.log('isvisitorid before funct', req.session.visitor_id);
+  req.session.visitor_id = isVisitorId(req.session.visitor_id);
+  console.log('isvisitorid after funct', req.session.visitor_id);
+
   if (!urlDatabase[req.params.id]) {
     res.statusCode = 404;
     res.end('Sorry, page not found. Please check the url given is valid');
@@ -211,6 +220,10 @@ app.get("/u/:id", (req, res) => {
 
 // 'get' page for login. Redirects to /urls if already logged in
 app.get("/login", (req, res) => {
+
+  console.log('isvisitorid before funct', req.session.visitor_id);
+  req.session.visitor_id = isVisitorId(req.session.visitor_id);
+  console.log('isvisitorid after funct', req.session.visitor_id);
 
   const user = isUserValid(req.session.user_id, users);
 
@@ -260,13 +273,17 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
 
-  req.session = null;
+  req.session.user_id = null;
   res.redirect('/urls');
 });
 
 // 'get the register new user page:
 // redirects to /url if user logged in already
 app.get("/register", (req, res) => {
+
+  console.log('isvisitorid before funct', req.session.visitor_id);
+  req.session.visitor_id = isVisitorId(req.session.visitor_id);
+  console.log('isvisitorid after funct', req.session.visitor_id);
 
   const user = isUserValid(req.session.user_id, users);
 
